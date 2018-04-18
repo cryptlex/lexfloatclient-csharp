@@ -16,57 +16,28 @@ namespace Cryptlex
         private const string DLL_FILE_NAME_X64 = "LexFloatClient64.dll";
 #endif
 
-        private string vGUID = null;
+        private string productId = null;
         private uint handle = 0;
 
         /*
-            FUNCTION: SetProductFile()
+            FUNCTION: SetProductId()
 
-            PURPOSE: Sets the path of the Product.dat file. This should be
-            used if your application and Product.dat file are in different
-            folders or you have renamed the Product.dat file.
-
-            If this function is used, it must be called on every start of
-            your program before any other functions are called.
+            PURPOSE: Sets the product id of your application.
 
             PARAMETERS:
-            * filePath - path of the product file (Product.dat)
+            * productId - the unique product id of your application as mentioned
+            on the product page in the dashboard.
 
-            RETURN CODES: LF_OK, LF_E_FPATH, LF_E_PFILE
-
-            NOTE: If this function fails to set the path of product file, none of the
-            other functions will work.
+            RETURN CODES: LF_OK, LF_E_PRODUCT_ID
         */
 
-        public static int SetProductFile(string filePath)
+        public int SetProductId(string productId)
         {
+            this.productId = productId;
 #if LF_ANY_CPU
-            return IntPtr.Size == 8 ? Native.SetProductFile_x64(filePath) : Native.SetProductFile(filePath);
+            return IntPtr.Size == 8 ? Native.GetHandle_x64(productId, ref handle) : Native.GetHandle(productId, ref handle);
 #else
-            return Native.SetProductFile(filePath);
-#endif
-
-        }
-
-        /*
-            FUNCTION: SetVersionGUID()
-
-            PURPOSE: Sets the version GUID of your application.
-
-            PARAMETERS:
-            * versionGUID - the unique version GUID of your application as mentioned
-              on the product version page of your application in the dashboard.
-
-            RETURN CODES: LF_OK, LF_E_PFILE, LF_E_GUID
-        */
-
-        public int SetVersionGUID(string versionGUID)
-        {
-            this.vGUID = versionGUID;
-#if LF_ANY_CPU
-            return IntPtr.Size == 8 ? Native.GetHandle_x64(versionGUID, ref handle) : Native.GetHandle(versionGUID, ref handle);
-#else
-            return Native.GetHandle(versionGUID, ref handle);
+            return Native.GetHandle(productId, ref handle);
 #endif
         }
 
@@ -76,11 +47,11 @@ namespace Cryptlex
             PURPOSE: Sets the network address of the LexFloatServer.
 
             PARAMETERS:
-            * handle - handle for the version GUID
+            * handle - handle for the product id
             * hostAddress - hostname or the IP address of the LexFloatServer
             * port - port of the LexFloatServer
 
-            RETURN CODES: LF_OK, LF_E_HANDLE, LF_E_GUID, LF_E_SERVER_ADDRESS
+            RETURN CODES: LF_OK, LF_E_HANDLE, LF_E_PRODUCT_ID, LF_FAIL
         */
 
         public int SetFloatServer(string hostAddress, ushort port)
@@ -104,10 +75,10 @@ namespace Cryptlex
             LF_E_LICENSE_EXPIRED_INET, LF_E_SERVER_TIME, LF_E_TIME.
 
             PARAMETERS:
-            * handle - handle for the version GUID
+            * handle - handle for the product id
             * callback - name of the callback function
 
-            RETURN CODES: LF_OK, LF_E_HANDLE, LF_E_GUID
+            RETURN CODES: LF_OK, LF_E_HANDLE, LF_E_PRODUCT_ID
         */
 
         public int SetLicenseCallback(CallbackType callback)
@@ -132,9 +103,9 @@ namespace Cryptlex
             PURPOSE: Sends the request to lease the license from the LexFloatServer.
 
             PARAMETERS:
-            * handle - handle for the version GUID
+            * handle - handle for the product id
 
-            RETURN CODES: LF_OK, LF_FAIL, LF_E_HANDLE, LF_E_GUID, LF_E_SERVER_ADDRESS,
+            RETURN CODES: LF_OK, LF_FAIL, LF_E_HANDLE, LF_E_PRODUCT_ID, LF_E_SERVER_ADDRESS,
             LF_E_CALLBACK, LF_E_LICENSE_EXISTS, LF_E_INET, LF_E_NO_FREE_LICENSE, LF_E_TIME,
             LF_E_PRODUCT_VERSION, LF_E_SERVER_TIME
         */
@@ -157,9 +128,9 @@ namespace Cryptlex
             Call this function before you exit your application to prevent zombie licenses.
 
             PARAMETERS:
-            * handle - handle for the version GUID
+            * handle - handle for the product id
 
-            RETURN CODES: LF_OK, LF_FAIL, LF_E_HANDLE, LF_E_GUID, LF_E_SERVER_ADDRESS,
+            RETURN CODES: LF_OK, LF_FAIL, LF_E_HANDLE, LF_E_PRODUCT_ID, LF_E_SERVER_ADDRESS,
             LF_E_CALLBACK, LF_E_INET, LF_E_TIME, LF_E_SERVER_TIME
         */
 
@@ -180,9 +151,9 @@ namespace Cryptlex
             it retuns LF_OK.
 
             PARAMETERS:
-            * handle - handle for the version GUID
+            * handle - handle for the product id
 
-            RETURN CODES: LF_OK, LF_FAIL, LF_E_HANDLE, LF_E_GUID, LF_E_SERVER_ADDRESS,
+            RETURN CODES: LF_OK, LF_FAIL, LF_E_HANDLE, LF_E_PRODUCT_ID, LF_E_SERVER_ADDRESS,
             LF_E_CALLBACK
         */
 
@@ -197,27 +168,27 @@ namespace Cryptlex
         }
 
         /*
-            FUNCTION: GetCustomLicenseField()
+            FUNCTION: GetLicenseMetadata()
 
-            PURPOSE: Get the value of the custom field associated with the float server key.
+            PURPOSE: Get the value of the license metadata field associated with the float server key.
 
             PARAMETERS:
-            * handle - handle for the version GUID
-            * fieldId - id of the custom field whose value you want to get
-            * fieldValue - pointer to a buffer that receives the value of the string
-            * length - size of the buffer pointed to by the fieldValue parameter
+            * handle - handle for the product id
+            * key - key of the metadata field whose value you want to get
+            * value - pointer to a buffer that receives the value of the string
+            * length - size of the buffer pointed to by the value parameter
 
-            RETURN CODES: LF_OK, LF_FAIL, LF_E_HANDLE, LF_E_GUID, LF_E_SERVER_ADDRESS,
-            LF_E_CALLBACK, LF_E_BUFFER_SIZE, LF_E_CUSTOM_FIELD_ID, LF_E_INET, LF_E_TIME,
+            RETURN CODES: LF_OK, LF_FAIL, LF_E_HANDLE, LF_E_PRODUCT_ID, LF_E_SERVER_ADDRESS,
+            LF_E_CALLBACK, LF_E_BUFFER_SIZE, LF_E_METADATA_KEY_NOT_FOUND, LF_E_INET, LF_E_TIME,
             LF_E_SERVER_TIME
         */
 
-        public int GetCustomLicenseField(string fieldId, StringBuilder fieldValue, int length)
+        public int GetLicenseMetadata(string key, StringBuilder value, int length)
         {
 #if LF_ANY_CPU
-            return IntPtr.Size == 8 ? Native.GetCustomLicenseField_x64(handle, fieldId, fieldValue, length) : Native.GetCustomLicenseField(handle, fieldId, fieldValue, length);
+            return IntPtr.Size == 8 ? Native.GetLicenseMetadata_x64(handle, key, value, length) : Native.GetLicenseMetadata(handle, key, value, length);
 #else
-            return Native.GetCustomLicenseField(handle, fieldId, fieldValue, length);
+            return Native.GetLicenseMetadata(handle, key, value, length);
 #endif
 
         }
@@ -244,145 +215,138 @@ namespace Cryptlex
 
         }
 
-        /*** Return Codes ***/
+        public static class StatusCodes
+        {
+            /*
+                CODE: LF_OK
 
-        public const int LF_OK = 0x00;
+                MESSAGE: Success code.
+            */
+            public const int LF_OK = 0;
 
-        public const int LF_FAIL = 0x01;
+            /*
+                CODE: LF_FAIL
 
-        /*
-            CODE: LF_E_INET
+                MESSAGE: Failure code.
+            */
+            public const int LF_FAIL = 1;
 
-            MESSAGE: Failed to connect to the server due to network error.
-        */
+            /*
+                CODE: LF_E_PRODUCT_ID
 
-        public const int LF_E_INET = 0x02;
+                MESSAGE: The product id is incorrect.
+            */
+            public const int LF_E_PRODUCT_ID = 40;
 
-        /*
-            CODE: LF_E_CALLBACK
+            /*
+                CODE: LF_E_CALLBACK
 
-            MESSAGE: Invalid or missing callback function.
-        */
+                MESSAGE: Invalid or missing callback function.
+            */
+            public const int LF_E_CALLBACK = 41;
 
-        public const int LF_E_CALLBACK = 0x03;
+            /*
+                CODE: LF_E_HANDLE
 
-        /*
-            CODE: LF_E_NO_FREE_LICENSE
+                MESSAGE: Invalid handle.
+            */
+            public const int LF_E_HANDLE = 42;
 
-            MESSAGE: No free license is available
-        */
+            /*
+                CODE: LF_E_SERVER_ADDRESS
 
-        public const int LF_E_NO_FREE_LICENSE = 0x04;
+                MESSAGE: Missing or invalid server address.
+            */
+            public const int LF_E_SERVER_ADDRESS = 43;
 
-        /*
-            CODE: LF_E_LICENSE_EXISTS
+            /*
+                CODE: LF_E_SERVER_TIME
 
-            MESSAGE: License has already been leased.
-        */
+                MESSAGE: System time on Server Machine has been tampered with. Ensure
+                your date and time settings are correct on the server machine.
+            */
 
-        public const int LF_E_LICENSE_EXISTS = 0x05;
+            public const int LF_E_SERVER_TIME = 44;
 
-        /*
-            CODE: LF_E_HANDLE
+            /*
+                CODE: LF_E_TIME
 
-            MESSAGE: Invalid handle.
-        */
+                MESSAGE: The system time has been tampered with. Ensure your date
+                and time settings are correct.
+            */
+            public const int LF_E_TIME = 45;
 
-        public const int LF_E_HANDLE = 0x06;
+            /*
+                CODE: LF_E_INET
 
-        /*
-            CODE: LF_E_LICENSE_EXPIRED
+                MESSAGE: Failed to connect to the server due to network error.
+            */
+            public const int LF_E_INET = 46;
 
-            MESSAGE: License lease has expired. This happens when the
-            request to refresh the license fails due to license been taken
-            up by some other client.
-        */
+            /*
+                CODE: LF_E_NO_FREE_LICENSE
 
-        public const int LF_E_LICENSE_EXPIRED = 0x07;
+                MESSAGE: No free license is available
+            */
 
-        /*
-            CODE: LF_E_LICENSE_EXPIRED_INET
+            public const int LF_E_NO_FREE_LICENSE = 47;
 
-            MESSAGE: License lease has expired due to network error. This 
-            happens when the request to refresh the license fails due to
-            network error.
-        */
+            /*
+                CODE: LF_E_LICENSE_EXISTS
 
-        public const int LF_E_LICENSE_EXPIRED_INET = 0x08;
+                MESSAGE: License has already been leased.
+            */
 
-        /*
-            CODE: LF_E_SERVER_ADDRESS
+            public const int LF_E_LICENSE_EXISTS = 48;
 
-            MESSAGE: Missing server address.
-        */
+            /*
+                CODE: LF_E_LICENSE_EXPIRED
 
-        public const int LF_E_SERVER_ADDRESS = 0x09;
+                MESSAGE: License lease has expired. This happens when the
+                request to refresh the license fails due to license been taken
+                up by some other client.
+            */
 
-        /*
-            CODE: LF_E_PFILE
+            public const int LF_E_LICENSE_EXPIRED = 49;
 
-            MESSAGE: Invalid or corrupted product file.
-        */
+            /*
+                CODE: LF_E_LICENSE_EXPIRED_INET
 
-        public const int LF_E_PFILE = 0x0A;
+                MESSAGE: License lease has expired due to network error. This
+                happens when the request to refresh the license fails due to
+                network error.
+            */
 
-        /*
-            CODE: LF_E_FPATH
+            public const int LF_E_LICENSE_EXPIRED_INET = 50;
 
-            MESSAGE: Invalid product file path.
-        */
+            /*
+                CODE: LF_E_BUFFER_SIZE
 
-        public const int LF_E_FPATH = 0x0B;
+                MESSAGE: The buffer size was smaller than required.
+            */
+            public const int LF_E_BUFFER_SIZE = 51;
 
-        /*
-            CODE: LF_E_PRODUCT_VERSION
+            /*
+                CODE: LF_E_METADATA_KEY_NOT_FOUND
 
-            MESSAGE: The version GUID of the client and server don't match.
-        */
+                MESSAGE: The metadata key does not exist.
+            */
+            public const int LF_E_METADATA_KEY_NOT_FOUND = 52;
 
-        public const int LF_E_PRODUCT_VERSION = 0x0C;
+            /*
+                CODE: LF_E_SERVER
 
-        /*
-            CODE: LF_E_GUID
+                MESSAGE: Server error.
+            */
+            public const int LF_E_SERVER = 70;
 
-            MESSAGE: The version GUID doesn't match that of the product file.
-        */
+            /*
+                CODE: LF_E_CLIENT
 
-        public const int LF_E_GUID = 0x0D;
-
-        /*
-            CODE: LF_E_SERVER_TIME
-
-            MESSAGE: System time on Server Machine has been tampered with. Ensure 
-            your date and time settings are correct on the server machine.
-        */
-
-        public const int LF_E_SERVER_TIME = 0x0E;
-
-        /*
-            CODE: LF_E_TIME
-
-            MESSAGE: The system time has been tampered with. Ensure your date
-            and time settings are correct.
-        */
-
-        public const int LF_E_TIME = 0x10;
-
-        /*
-            CODE: LF_E_CUSTOM_FIELD_ID
-
-            MESSAGE: Invalid custom field id.
-        */
-
-        public const int LF_E_CUSTOM_FIELD_ID = 0x11;
-
-        /*
-            CODE: LF_E_BUFFER_SIZE
-
-            MESSAGE: The buffer size was smaller than required.
-        */
-
-        public const int LF_E_BUFFER_SIZE = 0x12;
+                MESSAGE: Client error.
+            */
+            public const int LF_E_CLIENT = 71;
+        };
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         public delegate void CallbackType(uint status);
@@ -394,10 +358,7 @@ namespace Cryptlex
         static class Native
         {
             [DllImport(DLL_FILE_NAME, CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
-            public static extern int SetProductFile(string filePath);
-
-            [DllImport(DLL_FILE_NAME, CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
-            public static extern int GetHandle(string versionGUID, ref uint handle);
+            public static extern int GetHandle(string productId, ref uint handle);
 
             [DllImport(DLL_FILE_NAME, CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
             public static extern int SetFloatServer(uint handle, string hostAddress, ushort port);
@@ -415,17 +376,14 @@ namespace Cryptlex
             public static extern int HasLicense(uint handle);
 
             [DllImport(DLL_FILE_NAME, CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
-            public static extern int GetCustomLicenseField(uint handle, string fieldId, StringBuilder fieldValue, int length);
+            public static extern int GetLicenseMetadata(uint handle, string key, StringBuilder value, int length);
 
             [DllImport(DLL_FILE_NAME, CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
             public static extern int GlobalCleanUp();
 
 #if LF_ANY_CPU
-            [DllImport(DLL_FILE_NAME_X64, CharSet = CharSet.Unicode, EntryPoint = "SetProductFile", CallingConvention = CallingConvention.Cdecl)]
-            public static extern int SetProductFile_x64(string filePath);
-
             [DllImport(DLL_FILE_NAME_X64, CharSet = CharSet.Unicode, EntryPoint = "GetHandle", CallingConvention = CallingConvention.Cdecl)]
-            public static extern int GetHandle_x64(string versionGUID, ref uint handle);
+            public static extern int GetHandle_x64(string productId, ref uint handle);
 
             [DllImport(DLL_FILE_NAME_X64, CharSet = CharSet.Unicode, EntryPoint = "SetFloatServer", CallingConvention = CallingConvention.Cdecl)]
             public static extern int SetFloatServer_x64(uint handle, string hostAddress, ushort port);
@@ -442,8 +400,8 @@ namespace Cryptlex
             [DllImport(DLL_FILE_NAME_X64, CharSet = CharSet.Unicode, EntryPoint = "HasLicense", CallingConvention = CallingConvention.Cdecl)]
             public static extern int HasLicense_x64(uint handle);
 
-            [DllImport(DLL_FILE_NAME_X64, CharSet = CharSet.Unicode, EntryPoint = "GetCustomLicenseField", CallingConvention = CallingConvention.Cdecl)]
-            public static extern int GetCustomLicenseField_x64(uint handle, string fieldId, StringBuilder fieldValue, int length);
+            [DllImport(DLL_FILE_NAME_X64, CharSet = CharSet.Unicode, EntryPoint = "GetLicenseMetadata", CallingConvention = CallingConvention.Cdecl)]
+            public static extern int GetLicenseMetadata_x64(uint handle, string key, StringBuilder value, int length);
 
             [DllImport(DLL_FILE_NAME_X64, CharSet = CharSet.Unicode, EntryPoint = "GlobalCleanUp", CallingConvention = CallingConvention.Cdecl)]
             public static extern int GlobalCleanUp_x64();

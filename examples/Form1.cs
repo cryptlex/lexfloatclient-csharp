@@ -10,29 +10,22 @@ namespace FloatSample
         public Form1()
         {
             InitializeComponent();
-            int status;
-            status = LexFloatClient.SetProductFile("Product.dat");
-            if (status != LexFloatClient.LF_OK)
-            {
-                this.statusLabel.Text = "Error setting product file: " + status.ToString();
-                return;
-            }
         }
 
         private void LicenceRefreshCallback(uint status)
         {
             switch (status)
             {
-                case LexFloatClient.LF_E_LICENSE_EXPIRED:
+                case LexFloatClient.StatusCodes.LF_E_LICENSE_EXPIRED:
                     this.statusLabel.Text = "The lease expired before it could be renewed.";
                     break;
-                case LexFloatClient.LF_E_LICENSE_EXPIRED_INET:
+                case LexFloatClient.StatusCodes.LF_E_LICENSE_EXPIRED_INET:
                     this.statusLabel.Text = "The lease expired due to network connection failure.";
                     break;
-                case LexFloatClient.LF_E_SERVER_TIME:
+                case LexFloatClient.StatusCodes.LF_E_SERVER_TIME:
                     this.statusLabel.Text = "The lease expired because Server System time was modified.";
                     break;
-                case LexFloatClient.LF_E_TIME:
+                case LexFloatClient.StatusCodes.LF_E_TIME:
                     this.statusLabel.Text = "The lease expired because Client System time was modified.";
                     break;
                 default:
@@ -49,26 +42,26 @@ namespace FloatSample
             }
             int status;
             floatClient = new LexFloatClient();
-            status = floatClient.SetVersionGUID("59A44CE9-5415-8CF3-BD54-EA73A64E9A1B");
-            if (status != LexFloatClient.LF_OK)
+            status = floatClient.SetProductId("PASTE_YOUR_PRODUCT_ID");
+            if (status != LexFloatClient.StatusCodes.LF_OK)
             {
                 this.statusLabel.Text = "Error setting version GUID: " + status.ToString();
                 return;
             }
             status = floatClient.SetFloatServer( "localhost", 8090);
-            if (status != LexFloatClient.LF_OK)
+            if (status != LexFloatClient.StatusCodes.LF_OK)
             {
                 this.statusLabel.Text = "Error Setting Host Address: " + status.ToString();
                 return;
             }
             status = floatClient.SetLicenseCallback( LicenceRefreshCallback);
-            if (status != LexFloatClient.LF_OK)
+            if (status != LexFloatClient.StatusCodes.LF_OK)
             {
                 this.statusLabel.Text = "Error Setting Callback Function: " + status.ToString();
                 return;
             }
             status = floatClient.RequestLicense();
-            if (status != LexFloatClient.LF_OK)
+            if (status != LexFloatClient.StatusCodes.LF_OK)
             {
                 this.statusLabel.Text = "Error Requesting License: " + status.ToString();
                 return;
@@ -84,7 +77,7 @@ namespace FloatSample
             }
             int status;
             status = floatClient.DropLicense();
-            if (status != LexFloatClient.LF_OK)
+            if (status != LexFloatClient.StatusCodes.LF_OK)
             {
                 this.statusLabel.Text = "Error Dropping License: " + status.ToString();
                 return;
