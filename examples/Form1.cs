@@ -36,7 +36,7 @@ namespace FloatSample
 
         private void leaseBtn_Click(object sender, EventArgs e)
         {
-            if (floatClient != null && floatClient.HasLicense() == LexFloatClient.LF_OK)
+            if (floatClient != null && floatClient.HasLicense() == LexFloatClient.StatusCodes.LF_OK)
             {
                 return;
             }
@@ -45,7 +45,7 @@ namespace FloatSample
             status = floatClient.SetProductId("PASTE_YOUR_PRODUCT_ID");
             if (status != LexFloatClient.StatusCodes.LF_OK)
             {
-                this.statusLabel.Text = "Error setting version GUID: " + status.ToString();
+                this.statusLabel.Text = "Error setting product id: " + status.ToString();
                 return;
             }
             status = floatClient.SetFloatServer( "localhost", 8090);
