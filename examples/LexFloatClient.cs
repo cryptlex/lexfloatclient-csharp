@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Cryptlex
 {
-    public class LexFloatClient
+    public static class LexFloatClient
     {
         private const string DLL_FILE_NAME = "LexFloatClient.dll";
 
@@ -16,11 +16,8 @@ namespace Cryptlex
         private const string DLL_FILE_NAME_X64 = "LexFloatClient64.dll";
 #endif
 
-        private string productId = null;
-        private uint handle = 0;
-
         /*
-            FUNCTION: SetProductId()
+            FUNCTION: SetHostProductId()
 
             PURPOSE: Sets the product id of your application.
 
@@ -30,58 +27,55 @@ namespace Cryptlex
 
             RETURN CODES: LF_OK, LF_E_PRODUCT_ID
         */
-
-        public int SetProductId(string productId)
+        public int SetHostProductId(string productId)
         {
-            this.productId = productId;
 #if LF_ANY_CPU
-            return IntPtr.Size == 8 ? Native.GetHandle_x64(productId, ref handle) : Native.GetHandle(productId, ref handle);
+            return IntPtr.Size == 8 ? Native.SetHostProductId_x64(productId) : Native.SetHostProductId(productId);
 #else
-            return Native.GetHandle(productId, ref handle);
+            return Native.SetHostProductId(productId);
 #endif
         }
 
         /*
-            FUNCTION: SetFloatServer()
+            FUNCTION: SetHostUrl()
 
             PURPOSE: Sets the network address of the LexFloatServer.
 
+            The url format should be: http://[ip or hostname]:[port]
+
             PARAMETERS:
-            * handle - handle for the product id
-            * hostAddress - hostname or the IP address of the LexFloatServer
-            * port - port of the LexFloatServer
+            * hostUrl - url string having the correct format
 
-            RETURN CODES: LF_OK, LF_E_HANDLE, LF_E_PRODUCT_ID, LF_FAIL
+            RETURN CODES: LF_OK, LF_E_PRODUCT_ID, LF_E_HOST_URL
         */
-
-        public int SetFloatServer(string hostAddress, ushort port)
+        public int SetHostUrl(string hostUrl)
         {
 #if LF_ANY_CPU
-            return IntPtr.Size == 8 ? Native.SetFloatServer_x64(handle, hostAddress, port) : Native.SetFloatServer(handle, hostAddress, port);
+            return IntPtr.Size == 8 ? Native.SetHostUrl_x64(hostUrl) : Native.SetHostUrl(hostUrl);
 #else
-            return Native.SetFloatServer(handle, hostAddress, port);
+            return Native.SetHostUrl(hostUrl);
 #endif
-
         }
 
         /*
-            FUNCTION: SetLicenseCallback()
+            FUNCTION: SetFloatingLicenseCallback()
 
-            PURPOSE: Sets refresh license error callback function.
+            PURPOSE: Sets the renew license callback function.
 
-            Whenever the lease expires, a refresh lease request is sent to the
-            server. If the lease fails to refresh, refresh license callback function
-            gets invoked with the following status error codes: LF_E_LICENSE_EXPIRED,
-            LF_E_LICENSE_EXPIRED_INET, LF_E_SERVER_TIME, LF_E_TIME.
+            Whenever the license lease is about to expire, a renew request is sent to the
+            server. When the request completes, the license callback function
+            gets invoked with one of the following status codes:
+
+            LF_OK, LF_E_INET, LF_E_LICENSE_EXPIRED_INET, LF_E_LICENSE_NOT_FOUND, LF_E_CLIENT, LF_E_IP,
+            LF_E_SERVER, LF_E_TIME, LF_E_SERVER_LICENSE_NOT_ACTIVATED,LF_E_SERVER_TIME_MODIFIED,
+            LF_E_SERVER_LICENSE_SUSPENDED, LF_E_SERVER_LICENSE_EXPIRED, LF_E_SERVER_LICENSE_GRACE_PERIOD_OVER
 
             PARAMETERS:
-            * handle - handle for the product id
             * callback - name of the callback function
 
-            RETURN CODES: LF_OK, LF_E_HANDLE, LF_E_PRODUCT_ID
+            RETURN CODES: LF_OK, LF_E_PRODUCT_ID
         */
-
-        public int SetLicenseCallback(CallbackType callback)
+        public int SetFloatingLicenseCallback(CallbackType callback)
         {
             var wrappedCallback = callback;
             var syncTarget = callback.Target as System.Windows.Forms.Control;
@@ -90,129 +84,132 @@ namespace Cryptlex
                 wrappedCallback = (v) => syncTarget.Invoke(callback, new object[] { v });
             }
 #if LF_ANY_CPU
-            return IntPtr.Size == 8 ? Native.SetLicenseCallback_x64(handle, wrappedCallback) : Native.SetLicenseCallback(handle, wrappedCallback);
+            return IntPtr.Size == 8 ? Native.SetFloatingLicenseCallback_x64(wrappedCallback) : Native.SetFloatingLicenseCallback(wrappedCallback);
 #else
-            return Native.SetLicenseCallback(handle, wrappedCallback);
+            return Native.SetFloatingLicenseCallback(wrappedCallback);
 #endif
-
         }
 
         /*
-            FUNCTION: RequestLicense()
+            FUNCTION: SetFloatingClientMetadata()
 
-            PURPOSE: Sends the request to lease the license from the LexFloatServer.
+            PURPOSE: Sets the floating client metadata.
+
+            The  metadata appears along with the license details of the license
+            in LexFloatServer dashboard.
 
             PARAMETERS:
-            * handle - handle for the product id
+            * key - string of maximum length 256 characters with utf-8 encoding.
+            * value - string of maximum length 256 characters with utf-8 encoding.
 
-            RETURN CODES: LF_OK, LF_FAIL, LF_E_HANDLE, LF_E_PRODUCT_ID, LF_E_SERVER_ADDRESS,
-            LF_E_CALLBACK, LF_E_LICENSE_EXISTS, LF_E_INET, LF_E_NO_FREE_LICENSE, LF_E_TIME,
-            LF_E_PRODUCT_VERSION, LF_E_SERVER_TIME
+            RETURN CODES: LF_OK, LF_E_PRODUCT_ID, LF_E_METADATA_KEY_LENGTH,
+            LF_E_METADATA_VALUE_LENGTH, LF_E_ACTIVATION_METADATA_LIMIT
         */
-
-        public int RequestLicense()
+        public int SetFloatingClientMetadata(string key, string value)
         {
 #if LF_ANY_CPU
-            return IntPtr.Size == 8 ? Native.RequestLicense_x64(handle) : Native.RequestLicense(handle);
+            return IntPtr.Size == 8 ? Native.SetFloatingClientMetadata_x64(key, value) : Native.SetFloatingClientMetadata(key, value);
 #else
-            return Native.RequestLicense(handle);
+            return Native.SetFloatingClientMetadata(key, value);
 #endif
-
         }
 
         /*
-            FUNCTION: DropLicense()
+            FUNCTION: GetHostLicenseMetadata()
 
-            PURPOSE: Sends the request to drop the license from the LexFloatServer.
-
-            Call this function before you exit your application to prevent zombie licenses.
+            PURPOSE: Get the value of the license metadata field associated with the LexFloatServer license.
 
             PARAMETERS:
-            * handle - handle for the product id
-
-            RETURN CODES: LF_OK, LF_FAIL, LF_E_HANDLE, LF_E_PRODUCT_ID, LF_E_SERVER_ADDRESS,
-            LF_E_CALLBACK, LF_E_INET, LF_E_TIME, LF_E_SERVER_TIME
-        */
-
-        public int DropLicense()
-        {
-#if LF_ANY_CPU
-            return IntPtr.Size == 8 ? Native.DropLicense_x64(handle) : Native.DropLicense(handle);
-#else
-            return Native.DropLicense(handle);
-#endif
-
-        }
-
-        /*
-            FUNCTION: HasLicense()
-
-            PURPOSE: Checks whether any license has been leased or not. If yes,
-            it retuns LF_OK.
-
-            PARAMETERS:
-            * handle - handle for the product id
-
-            RETURN CODES: LF_OK, LF_FAIL, LF_E_HANDLE, LF_E_PRODUCT_ID, LF_E_SERVER_ADDRESS,
-            LF_E_CALLBACK
-        */
-
-        public int HasLicense()
-        {
-#if LF_ANY_CPU
-            return IntPtr.Size == 8 ? Native.HasLicense_x64(handle) : Native.HasLicense(handle);
-#else
-            return Native.HasLicense(handle);
-#endif
-
-        }
-
-        /*
-            FUNCTION: GetLicenseMetadata()
-
-            PURPOSE: Get the value of the license metadata field associated with the float server key.
-
-            PARAMETERS:
-            * handle - handle for the product id
             * key - key of the metadata field whose value you want to get
             * value - pointer to a buffer that receives the value of the string
             * length - size of the buffer pointed to by the value parameter
 
-            RETURN CODES: LF_OK, LF_FAIL, LF_E_HANDLE, LF_E_PRODUCT_ID, LF_E_SERVER_ADDRESS,
-            LF_E_CALLBACK, LF_E_BUFFER_SIZE, LF_E_METADATA_KEY_NOT_FOUND, LF_E_INET, LF_E_TIME,
-            LF_E_SERVER_TIME
+            RETURN CODES: LF_OK, LF_E_PRODUCT_ID, LF_E_NO_LICENSE, LF_E_BUFFER_SIZE,
+            LF_E_METADATA_KEY_NOT_FOUND
         */
-
-        public int GetLicenseMetadata(string key, StringBuilder value, int length)
+        public int GetHostLicenseMetadata(string key, StringBuilder value, int length)
         {
 #if LF_ANY_CPU
-            return IntPtr.Size == 8 ? Native.GetLicenseMetadata_x64(handle, key, value, length) : Native.GetLicenseMetadata(handle, key, value, length);
+            return IntPtr.Size == 8 ? Native.GetHostLicenseMetadata_x64(key, value, length) : Native.GetHostLicenseMetadata(key, value, length);
 #else
-            return Native.GetLicenseMetadata(handle, key, value, length);
+            return Native.GetHostLicenseMetadata(key, value, length);
 #endif
-
         }
 
         /*
-            FUNCTION: GlobalCleanUp()
+            FUNCTION: GetHostLicenseExpiryDate()
 
-            PURPOSE: Releases the resources acquired for sending network requests.
+            PURPOSE: Gets the license expiry date timestamp of the LexFloatServer license.
 
-            Call this function before you exit your application.
+            PARAMETERS:
+            * expiryDate - pointer to the integer that receives the value
 
-            RETURN CODES: LF_OK
-
-            NOTE: This function does not drop any leased license on the LexFloatServer.
+            RETURN CODES: LF_OK, LF_E_PRODUCT_ID, LF_E_NO_LICENSE
         */
-
-        public static int GlobalCleanUp()
+        public int GetHostLicenseExpiryDate(ref uint expiryDate)
         {
 #if LF_ANY_CPU
-            return IntPtr.Size == 8 ? Native.GlobalCleanUp_x64() : Native.GlobalCleanUp();
+            return IntPtr.Size == 8 ? Native.GetHostLicenseExpiryDate_x64(ref expiryDate) : Native.GetHostLicenseExpiryDate(ref expiryDate);
 #else
-            return Native.GlobalCleanUp();
+            return Native.GetHostLicenseExpiryDate(ref expiryDate);
 #endif
+        }
 
+        /*
+            FUNCTION: RequestFloatingLicense()
+
+            PURPOSE: Sends the request to lease the license from the LexFloatServer.
+
+            RETURN CODES: LF_OK, LF_FAIL, LF_E_PRODUCT_ID, LF_E_LICENSE_EXISTS, LF_E_HOST_URL,
+            LF_E_CALLBACK, LA_E_LICENSE_LIMIT_REACHED, LF_E_INET, LF_E_TIME, LF_E_CLIENT, LF_E_IP, LF_E_SERVER,
+            LF_E_SERVER_LICENSE_NOT_ACTIVATED, LF_E_SERVER_TIME_MODIFIED, LF_E_SERVER_LICENSE_SUSPENDED,
+            LF_E_SERVER_LICENSE_GRACE_PERIOD_OVER, LF_E_SERVER_LICENSE_EXPIRED
+        */
+        public int RequestFloatingLicense()
+        {
+#if LF_ANY_CPU
+            return IntPtr.Size == 8 ? Native.RequestFloatingLicense_x64() : Native.RequestFloatingLicense();
+#else
+            return Native.RequestFloatingLicense();
+#endif
+        }
+
+        /*
+            FUNCTION: DropFloatingLicense()
+
+            PURPOSE: Sends the request to the LexFloatServer to free the license.
+
+            Call this function before you exit your application to prevent zombie licenses.
+
+            RETURN CODES: LF_OK, LF_E_PRODUCT_ID, LF_E_NO_LICENSE, LF_E_HOST_URL, LF_E_CALLBACK,
+            LF_E_INET, LF_E_LICENSE_NOT_FOUND, LF_E_CLIENT, LF_E_IP, LF_E_SERVER,
+            LF_E_SERVER_LICENSE_NOT_ACTIVATED, LF_E_SERVER_TIME_MODIFIED, LF_E_SERVER_LICENSE_SUSPENDED,
+            LF_E_SERVER_LICENSE_GRACE_PERIOD_OVER, LF_E_SERVER_LICENSE_EXPIRED
+        */
+        public int DropFloatingLicense()
+        {
+#if LF_ANY_CPU
+            return IntPtr.Size == 8 ? Native.DropFloatingLicense_x64() : Native.DropFloatingLicense();
+#else
+            return Native.DropFloatingLicense();
+#endif
+        }
+
+        /*
+            FUNCTION: HasFloatingLicense()
+
+            PURPOSE: Checks whether any license has been leased or not. If yes,
+            it retuns LF_OK.
+
+            RETURN CODES: LF_OK, LF_E_PRODUCT_ID, LF_E_NO_LICENSE
+        */
+        public int HasFloatingLicense()
+        {
+#if LF_ANY_CPU
+            return IntPtr.Size == 8 ? Native.HasFloatingLicense_x64() : Native.HasFloatingLicense();
+#else
+            return Native.HasFloatingLicense();
+#endif
         }
 
         public static class StatusCodes
@@ -246,68 +243,47 @@ namespace Cryptlex
             public const int LF_E_CALLBACK = 41;
 
             /*
-                CODE: LF_E_HANDLE
+                CODE: LF_E_HOST_URL
 
-                MESSAGE: Invalid handle.
+                MESSAGE: Missing or invalid server url.
             */
-            public const int LF_E_HANDLE = 42;
-
-            /*
-                CODE: LF_E_SERVER_ADDRESS
-
-                MESSAGE: Missing or invalid server address.
-            */
-            public const int LF_E_SERVER_ADDRESS = 43;
-
-            /*
-                CODE: LF_E_SERVER_TIME
-
-                MESSAGE: System time on Server Machine has been tampered with. Ensure
-                your date and time settings are correct on the server machine.
-            */
-
-            public const int LF_E_SERVER_TIME = 44;
+            public const int LF_E_HOST_URL = 42;
 
             /*
                 CODE: LF_E_TIME
 
-                MESSAGE: The system time has been tampered with. Ensure your date
-                and time settings are correct.
+                MESSAGE: Ensure system date and time settings are correct.
             */
-            public const int LF_E_TIME = 45;
+            public const int LF_E_TIME = 43;
 
             /*
                 CODE: LF_E_INET
 
                 MESSAGE: Failed to connect to the server due to network error.
             */
-            public const int LF_E_INET = 46;
+            public const int LF_E_INET = 44;
 
             /*
-                CODE: LF_E_NO_FREE_LICENSE
+                CODE: LF_E_NO_LICENSE
 
-                MESSAGE: No free license is available
+                MESSAGE: License has not been leased yet.
             */
-
-            public const int LF_E_NO_FREE_LICENSE = 47;
+            public const int LF_E_NO_LICENSE = 45;
 
             /*
                 CODE: LF_E_LICENSE_EXISTS
 
                 MESSAGE: License has already been leased.
             */
-
-            public const int LF_E_LICENSE_EXISTS = 48;
+            public const int LF_E_LICENSE_EXISTS = 46;
 
             /*
-                CODE: LF_E_LICENSE_EXPIRED
+                CODE: LF_E_LICENSE_NOT_FOUND
 
-                MESSAGE: License lease has expired. This happens when the
-                request to refresh the license fails due to license been taken
-                up by some other client.
+                MESSAGE: License does not exist on server or has already expired. This
+                happenswhen the request to refresh the license is delayed.
             */
-
-            public const int LF_E_LICENSE_EXPIRED = 49;
+            public const int LF_E_LICENSE_NOT_FOUND = 47;
 
             /*
                 CODE: LF_E_LICENSE_EXPIRED_INET
@@ -316,37 +292,107 @@ namespace Cryptlex
                 happens when the request to refresh the license fails due to
                 network error.
             */
+            public const int LF_E_LICENSE_EXPIRED_INET = 48;
 
-            public const int LF_E_LICENSE_EXPIRED_INET = 50;
+            /*
+                CODE: LA_E_LICENSE_LIMIT_REACHED
+
+                MESSAGE: The server has reached it's allowed limit of floating licenses.
+            */
+            public const int LA_E_LICENSE_LIMIT_REACHED = 49;
 
             /*
                 CODE: LF_E_BUFFER_SIZE
 
                 MESSAGE: The buffer size was smaller than required.
             */
-            public const int LF_E_BUFFER_SIZE = 51;
+            public const int LF_E_BUFFER_SIZE = 50;
 
             /*
                 CODE: LF_E_METADATA_KEY_NOT_FOUND
 
                 MESSAGE: The metadata key does not exist.
             */
-            public const int LF_E_METADATA_KEY_NOT_FOUND = 52;
+            public const int LF_E_METADATA_KEY_NOT_FOUND = 51;
 
             /*
-                CODE: LF_E_SERVER
+                CODE: LA_E_METADATA_KEY_LENGTH
 
-                MESSAGE: Server error.
+                MESSAGE: Metadata key length is more than 256 characters.
             */
-            public const int LF_E_SERVER = 70;
+            public const int LF_E_METADATA_KEY_LENGTH = 52;
+
+            /*
+                CODE: LA_E_METADATA_VALUE_LENGTH
+
+                MESSAGE: Metadata value length is more than 256 characters.
+            */
+            public const int LF_E_METADATA_VALUE_LENGTH = 53;
+
+            /*
+                CODE: LA_E_ACTIVATION_METADATA_LIMIT
+
+                MESSAGE: The floating client has reached it's metadata fields limit.
+            */
+            public const int LF_E_FLOATING_CLIENT_METADATA_LIMIT = 54;
+
+            /*
+                CODE: LF_E_IP
+
+                MESSAGE: IP address is not allowed.
+            */
+            public const int LF_E_IP = 60;
 
             /*
                 CODE: LF_E_CLIENT
 
                 MESSAGE: Client error.
             */
-            public const int LF_E_CLIENT = 71;
-        };
+            public const int LF_E_CLIENT = 70;
+
+            /*
+                CODE: LF_E_SERVER
+
+                MESSAGE: Server error.
+            */
+            public const int LF_E_SERVER = 71;
+
+            /*
+                CODE: LF_E_SERVER_TIME_MODIFIED
+
+                MESSAGE: System time on server has been tampered with. Ensure
+                your date and time settings are correct on the server machine.
+            */
+            public const int LF_E_SERVER_TIME_MODIFIED = 72;
+
+            /*
+                CODE: LF_E_SERVER_LICENSE_NOT_ACTIVATED
+
+                MESSAGE: The server has not been activated using a license key.
+            */
+            public const int LF_E_SERVER_LICENSE_NOT_ACTIVATED = 73;
+
+            /*
+                CODE: LF_E_SERVER_LICENSE_EXPIRED
+
+                MESSAGE: The server license has expired.
+            */
+            public const int LF_E_SERVER_LICENSE_EXPIRED = 74;
+
+            /*
+                CODE: LF_E_SERVER_LICENSE_SUSPENDED
+
+                MESSAGE: The server license has been suspended.
+            */
+            public const int LF_E_SERVER_LICENSE_SUSPENDED = 75;
+
+            /*
+                CODE: LF_E_SERVER_LICENSE_GRACE_PERIOD_OVER
+
+                MESSAGE: The grace period for server license is over.
+            */
+            public const int LF_E_SERVER_LICENSE_GRACE_PERIOD_OVER = 76;
+        }
 
         [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
         public delegate void CallbackType(uint status);
@@ -358,54 +404,59 @@ namespace Cryptlex
         static class Native
         {
             [DllImport(DLL_FILE_NAME, CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
-            public static extern int GetHandle(string productId, ref uint handle);
+            public static extern int SetHostProductId(string productId);
 
             [DllImport(DLL_FILE_NAME, CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
-            public static extern int SetFloatServer(uint handle, string hostAddress, ushort port);
+            public static extern int SetHostUrl(string hostUrl);
 
             [DllImport(DLL_FILE_NAME, CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
-            public static extern int SetLicenseCallback(uint handle, CallbackType callback);
+            public static extern int SetFloatingLicenseCallback(CallbackType callback);
 
             [DllImport(DLL_FILE_NAME, CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
-            public static extern int RequestLicense(uint handle);
+            public static extern int SetFloatingClientMetadata(string key, string value);
 
             [DllImport(DLL_FILE_NAME, CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
-            public static extern int DropLicense(uint handle);
+            public static extern int GetHostLicenseMetadata(string key, StringBuilder value, int length);
 
             [DllImport(DLL_FILE_NAME, CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
-            public static extern int HasLicense(uint handle);
+            public static extern int GetHostLicenseExpiryDate(ref uint expiryDate);
 
             [DllImport(DLL_FILE_NAME, CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
-            public static extern int GetLicenseMetadata(uint handle, string key, StringBuilder value, int length);
+            public static extern int RequestFloatingLicense();
 
             [DllImport(DLL_FILE_NAME, CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
-            public static extern int GlobalCleanUp();
+            public static extern int DropFloatingLicense();
+
+            [DllImport(DLL_FILE_NAME, CharSet = CharSet.Unicode, CallingConvention = CallingConvention.Cdecl)]
+            public static extern int HasFloatingLicense();
 
 #if LF_ANY_CPU
-            [DllImport(DLL_FILE_NAME_X64, CharSet = CharSet.Unicode, EntryPoint = "GetHandle", CallingConvention = CallingConvention.Cdecl)]
-            public static extern int GetHandle_x64(string productId, ref uint handle);
+            [DllImport(DLL_FILE_NAME_X64, CharSet = CharSet.Unicode, EntryPoint = "SetHostProductId", CallingConvention = CallingConvention.Cdecl)]
+            public static extern int SetHostProductId_x64(string productId);
 
-            [DllImport(DLL_FILE_NAME_X64, CharSet = CharSet.Unicode, EntryPoint = "SetFloatServer", CallingConvention = CallingConvention.Cdecl)]
-            public static extern int SetFloatServer_x64(uint handle, string hostAddress, ushort port);
+            [DllImport(DLL_FILE_NAME_X64, CharSet = CharSet.Unicode, EntryPoint = "SetHostUrl", CallingConvention = CallingConvention.Cdecl)]
+            public static extern int SetHostUrl_x64(string hostUrl);
 
-            [DllImport(DLL_FILE_NAME_X64, CharSet = CharSet.Unicode, EntryPoint = "SetLicenseCallback", CallingConvention = CallingConvention.Cdecl)]
-            public static extern int SetLicenseCallback_x64(uint handle, CallbackType callback);
+            [DllImport(DLL_FILE_NAME_X64, CharSet = CharSet.Unicode, EntryPoint = "SetFloatingLicenseCallback", CallingConvention = CallingConvention.Cdecl)]
+            public static extern int SetFloatingLicenseCallback_x64(CallbackType callback);
 
-            [DllImport(DLL_FILE_NAME_X64, CharSet = CharSet.Unicode, EntryPoint = "RequestLicense", CallingConvention = CallingConvention.Cdecl)]
-            public static extern int RequestLicense_x64(uint handle);
+            [DllImport(DLL_FILE_NAME_X64, CharSet = CharSet.Unicode, EntryPoint = "SetFloatingClientMetadata", CallingConvention = CallingConvention.Cdecl)]
+            public static extern int SetFloatingClientMetadata_x64(string key, string value);
 
-            [DllImport(DLL_FILE_NAME_X64, CharSet = CharSet.Unicode, EntryPoint = "DropLicense", CallingConvention = CallingConvention.Cdecl)]
-            public static extern int DropLicense_x64(uint handle);
+            [DllImport(DLL_FILE_NAME_X64, CharSet = CharSet.Unicode, EntryPoint = "GetHostLicenseMetadata", CallingConvention = CallingConvention.Cdecl)]
+            public static extern int GetHostLicenseMetadata_x64(string key, StringBuilder value, int length);
 
-            [DllImport(DLL_FILE_NAME_X64, CharSet = CharSet.Unicode, EntryPoint = "HasLicense", CallingConvention = CallingConvention.Cdecl)]
-            public static extern int HasLicense_x64(uint handle);
+            [DllImport(DLL_FILE_NAME_X64, CharSet = CharSet.Unicode, EntryPoint = "GetHostLicenseExpiryDate", CallingConvention = CallingConvention.Cdecl)]
+            public static extern int GetHostLicenseExpiryDate_x64(ref uint expiryDate);
 
-            [DllImport(DLL_FILE_NAME_X64, CharSet = CharSet.Unicode, EntryPoint = "GetLicenseMetadata", CallingConvention = CallingConvention.Cdecl)]
-            public static extern int GetLicenseMetadata_x64(uint handle, string key, StringBuilder value, int length);
+            [DllImport(DLL_FILE_NAME_X64, CharSet = CharSet.Unicode, EntryPoint = "RequestFloatingLicense", CallingConvention = CallingConvention.Cdecl)]
+            public static extern int RequestFloatingLicense_x64();
 
-            [DllImport(DLL_FILE_NAME_X64, CharSet = CharSet.Unicode, EntryPoint = "GlobalCleanUp", CallingConvention = CallingConvention.Cdecl)]
-            public static extern int GlobalCleanUp_x64();
+            [DllImport(DLL_FILE_NAME_X64, CharSet = CharSet.Unicode, EntryPoint = "DropFloatingLicense", CallingConvention = CallingConvention.Cdecl)]
+            public static extern int DropFloatingLicense_x64();
 
+            [DllImport(DLL_FILE_NAME_X64, CharSet = CharSet.Unicode, EntryPoint = "HasFloatingLicense", CallingConvention = CallingConvention.Cdecl)]
+            public static extern int HasFloatingLicense_x64();
 #endif
         }
     }
