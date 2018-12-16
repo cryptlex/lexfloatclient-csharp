@@ -32,7 +32,7 @@ namespace FloatSample
 
         private void leaseBtn_Click(object sender, EventArgs e)
         {
-            if (LexFloatClient.HasLicense() == LexFloatClient.StatusCodes.LF_OK)
+            if (LexFloatClient.HasFloatingLicense() == LexFloatClient.StatusCodes.LF_OK)
             {
                 return;
             }
@@ -66,12 +66,12 @@ namespace FloatSample
 
         private void dropBtn_Click(object sender, EventArgs e)
         {
-            if (LexFloatClient.HasLicense() != LexFloatClient.StatusCodes.LF_OK)
+            if (LexFloatClient.HasFloatingLicense() != LexFloatClient.StatusCodes.LF_OK)
             {
                 return;
             }
             int status;
-            status = LexFloatClient.DropLicense();
+            status = LexFloatClient.DropFloatingLicense();
             if (status != LexFloatClient.StatusCodes.LF_OK)
             {
                 this.statusLabel.Text = "Error dropping license: " + status.ToString();

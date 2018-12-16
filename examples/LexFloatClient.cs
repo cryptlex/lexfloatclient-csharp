@@ -27,7 +27,7 @@ namespace Cryptlex
 
             RETURN CODES: LF_OK, LF_E_PRODUCT_ID
         */
-        public int SetHostProductId(string productId)
+        public static int SetHostProductId(string productId)
         {
 #if LF_ANY_CPU
             return IntPtr.Size == 8 ? Native.SetHostProductId_x64(productId) : Native.SetHostProductId(productId);
@@ -48,7 +48,7 @@ namespace Cryptlex
 
             RETURN CODES: LF_OK, LF_E_PRODUCT_ID, LF_E_HOST_URL
         */
-        public int SetHostUrl(string hostUrl)
+        public static int SetHostUrl(string hostUrl)
         {
 #if LF_ANY_CPU
             return IntPtr.Size == 8 ? Native.SetHostUrl_x64(hostUrl) : Native.SetHostUrl(hostUrl);
@@ -75,7 +75,7 @@ namespace Cryptlex
 
             RETURN CODES: LF_OK, LF_E_PRODUCT_ID
         */
-        public int SetFloatingLicenseCallback(CallbackType callback)
+        public static int SetFloatingLicenseCallback(CallbackType callback)
         {
             var wrappedCallback = callback;
             var syncTarget = callback.Target as System.Windows.Forms.Control;
@@ -105,7 +105,7 @@ namespace Cryptlex
             RETURN CODES: LF_OK, LF_E_PRODUCT_ID, LF_E_METADATA_KEY_LENGTH,
             LF_E_METADATA_VALUE_LENGTH, LF_E_ACTIVATION_METADATA_LIMIT
         */
-        public int SetFloatingClientMetadata(string key, string value)
+        public static int SetFloatingClientMetadata(string key, string value)
         {
 #if LF_ANY_CPU
             return IntPtr.Size == 8 ? Native.SetFloatingClientMetadata_x64(key, value) : Native.SetFloatingClientMetadata(key, value);
@@ -127,7 +127,7 @@ namespace Cryptlex
             RETURN CODES: LF_OK, LF_E_PRODUCT_ID, LF_E_NO_LICENSE, LF_E_BUFFER_SIZE,
             LF_E_METADATA_KEY_NOT_FOUND
         */
-        public int GetHostLicenseMetadata(string key, StringBuilder value, int length)
+        public static int GetHostLicenseMetadata(string key, StringBuilder value, int length)
         {
 #if LF_ANY_CPU
             return IntPtr.Size == 8 ? Native.GetHostLicenseMetadata_x64(key, value, length) : Native.GetHostLicenseMetadata(key, value, length);
@@ -146,7 +146,7 @@ namespace Cryptlex
 
             RETURN CODES: LF_OK, LF_E_PRODUCT_ID, LF_E_NO_LICENSE
         */
-        public int GetHostLicenseExpiryDate(ref uint expiryDate)
+        public static int GetHostLicenseExpiryDate(ref uint expiryDate)
         {
 #if LF_ANY_CPU
             return IntPtr.Size == 8 ? Native.GetHostLicenseExpiryDate_x64(ref expiryDate) : Native.GetHostLicenseExpiryDate(ref expiryDate);
@@ -165,7 +165,7 @@ namespace Cryptlex
             LF_E_SERVER_LICENSE_NOT_ACTIVATED, LF_E_SERVER_TIME_MODIFIED, LF_E_SERVER_LICENSE_SUSPENDED,
             LF_E_SERVER_LICENSE_GRACE_PERIOD_OVER, LF_E_SERVER_LICENSE_EXPIRED
         */
-        public int RequestFloatingLicense()
+        public static int RequestFloatingLicense()
         {
 #if LF_ANY_CPU
             return IntPtr.Size == 8 ? Native.RequestFloatingLicense_x64() : Native.RequestFloatingLicense();
@@ -186,7 +186,7 @@ namespace Cryptlex
             LF_E_SERVER_LICENSE_NOT_ACTIVATED, LF_E_SERVER_TIME_MODIFIED, LF_E_SERVER_LICENSE_SUSPENDED,
             LF_E_SERVER_LICENSE_GRACE_PERIOD_OVER, LF_E_SERVER_LICENSE_EXPIRED
         */
-        public int DropFloatingLicense()
+        public static int DropFloatingLicense()
         {
 #if LF_ANY_CPU
             return IntPtr.Size == 8 ? Native.DropFloatingLicense_x64() : Native.DropFloatingLicense();
@@ -203,7 +203,7 @@ namespace Cryptlex
 
             RETURN CODES: LF_OK, LF_E_PRODUCT_ID, LF_E_NO_LICENSE
         */
-        public int HasFloatingLicense()
+        public static int HasFloatingLicense()
         {
 #if LF_ANY_CPU
             return IntPtr.Size == 8 ? Native.HasFloatingLicense_x64() : Native.HasFloatingLicense();
