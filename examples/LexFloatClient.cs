@@ -161,7 +161,7 @@ namespace Cryptlex
             PURPOSE: Sends the request to lease the license from the LexFloatServer.
 
             RETURN CODES: LF_OK, LF_FAIL, LF_E_PRODUCT_ID, LF_E_LICENSE_EXISTS, LF_E_HOST_URL,
-            LF_E_CALLBACK, LA_E_LICENSE_LIMIT_REACHED, LF_E_INET, LF_E_TIME, LF_E_CLIENT, LF_E_IP, LF_E_SERVER,
+            LF_E_CALLBACK, LF_E_LICENSE_LIMIT_REACHED, LF_E_INET, LF_E_TIME, LF_E_CLIENT, LF_E_IP, LF_E_SERVER,
             LF_E_SERVER_LICENSE_NOT_ACTIVATED, LF_E_SERVER_TIME_MODIFIED, LF_E_SERVER_LICENSE_SUSPENDED,
             LF_E_SERVER_LICENSE_GRACE_PERIOD_OVER, LF_E_SERVER_LICENSE_EXPIRED
         */
@@ -281,7 +281,7 @@ namespace Cryptlex
                 CODE: LF_E_LICENSE_NOT_FOUND
 
                 MESSAGE: License does not exist on server or has already expired. This
-                happenswhen the request to refresh the license is delayed.
+                happens when the request to refresh the license is delayed.
             */
             public const int LF_E_LICENSE_NOT_FOUND = 47;
 
@@ -295,11 +295,11 @@ namespace Cryptlex
             public const int LF_E_LICENSE_EXPIRED_INET = 48;
 
             /*
-                CODE: LA_E_LICENSE_LIMIT_REACHED
+                CODE: LF_E_LICENSE_LIMIT_REACHED
 
                 MESSAGE: The server has reached it's allowed limit of floating licenses.
             */
-            public const int LA_E_LICENSE_LIMIT_REACHED = 49;
+            public const int LF_E_LICENSE_LIMIT_REACHED = 49;
 
             /*
                 CODE: LF_E_BUFFER_SIZE
@@ -316,21 +316,21 @@ namespace Cryptlex
             public const int LF_E_METADATA_KEY_NOT_FOUND = 51;
 
             /*
-                CODE: LA_E_METADATA_KEY_LENGTH
+                CODE: LF_E_METADATA_KEY_LENGTH
 
                 MESSAGE: Metadata key length is more than 256 characters.
             */
             public const int LF_E_METADATA_KEY_LENGTH = 52;
 
             /*
-                CODE: LA_E_METADATA_VALUE_LENGTH
+                CODE: LF_E_METADATA_VALUE_LENGTH
 
                 MESSAGE: Metadata value length is more than 256 characters.
             */
             public const int LF_E_METADATA_VALUE_LENGTH = 53;
 
             /*
-                CODE: LA_E_ACTIVATION_METADATA_LIMIT
+                CODE: LF_E_ACTIVATION_METADATA_LIMIT
 
                 MESSAGE: The floating client has reached it's metadata fields limit.
             */
