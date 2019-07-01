@@ -152,7 +152,7 @@ namespace Cryptlex
         */
         public static int GetHostLicenseMeterAttribute(string name, ref uint allowedUses, ref uint totalUses)
         {
-#if LA_ANY_CPU
+#if LF_ANY_CPU
             return IntPtr.Size == 8 ? Native.GetHostLicenseMeterAttribute_x64(name, ref allowedUses, ref totalUses) : Native.GetHostLicenseMeterAttribute(name, ref allowedUses, ref totalUses);
 #else 
             return Native.GetHostLicenseMeterAttribute(name, ref allowedUses, ref totalUses);
@@ -191,7 +191,7 @@ namespace Cryptlex
         */
         public static int GetFloatingClientMeterAttributeUses(string name, ref uint uses)
         {
-#if LA_ANY_CPU
+#if LF_ANY_CPU
             return IntPtr.Size == 8 ? Native.GetFloatingClientMeterAttributeUses_x64(name, ref uses) : Native.GetFloatingClientMeterAttributeUses(name, ref uses);
 #else 
             return Native.GetFloatingClientMeterAttributeUses(name, ref uses);
@@ -271,7 +271,7 @@ namespace Cryptlex
         */
         public static int IncrementFloatingClientMeterAttributeUses(string name, uint increment)
         {
-#if LA_ANY_CPU 
+#if LF_ANY_CPU 
             return IntPtr.Size == 8 ? Native.IncrementFloatingClientMeterAttributeUses_x64(name, increment) : Native.IncrementFloatingClientMeterAttributeUses(name, increment);
 #else 
             return Native.IncrementFloatingClientMeterAttributeUses(name, increment);
@@ -296,7 +296,7 @@ namespace Cryptlex
         */
         public static int DecrementFloatingClientMeterAttributeUses(string name, uint decrement)
         {
-#if LA_ANY_CPU 
+#if LF_ANY_CPU 
             return IntPtr.Size == 8 ? Native.DecrementFloatingClientMeterAttributeUses_x64(name, decrement) : Native.DecrementFloatingClientMeterAttributeUses(name, decrement);
 #else 
             return Native.DecrementFloatingClientMeterAttributeUses(name, decrement);
@@ -318,7 +318,7 @@ namespace Cryptlex
         */
         public static int ResetFloatingClientMeterAttributeUses(string name)
         {
-#if LA_ANY_CPU 
+#if LF_ANY_CPU 
             return IntPtr.Size == 8 ? Native.ResetFloatingClientMeterAttributeUses_x64(name) : Native.ResetFloatingClientMeterAttributeUses(name);
 #else 
             return Native.ResetFloatingClientMeterAttributeUses(name);
