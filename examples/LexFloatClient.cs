@@ -1,6 +1,7 @@
 using System;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Collections.Generic;
 
 namespace Cryptlex
 {
@@ -83,6 +84,7 @@ namespace Cryptlex
             {
                 wrappedCallback = (v) => syncTarget.Invoke(callback, new object[] { v });
             }
+            callbackList.Add(wrappedCallback);
 #if LF_ANY_CPU
             return IntPtr.Size == 8 ? Native.SetFloatingLicenseCallback_x64(wrappedCallback) : Native.SetFloatingLicenseCallback(wrappedCallback);
 #else
@@ -398,8 +400,7 @@ namespace Cryptlex
         public delegate void CallbackType(uint status);
 
         /* To prevent garbage collection of delegate, need to keep a reference */
-
-        static CallbackType leaseCallback;
+        static List<CallbackType> callbackList;
 
         static class Native
         {
