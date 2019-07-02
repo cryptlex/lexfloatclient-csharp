@@ -525,7 +525,8 @@ namespace Cryptlex
         public delegate void CallbackType(uint status);
 
         /* To prevent garbage collection of delegate, need to keep a reference */
-        static List<CallbackType> callbackList;
+        static readonly List<CallbackType> callbackList = new List<CallbackType>();
+
 
         static class Native
         {
